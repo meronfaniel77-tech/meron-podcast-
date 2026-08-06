@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="MerON">
-    <link rel="apple-touch-icon" href="/logo.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -51,9 +51,9 @@
                 </button>
             </div>
 
-            <!-- Logo con fallback automatico a una scritta stilizzata se manca logo.png -->
+            <!-- Logo con percorso static corretto -->
             <div class="flex flex-col items-center justify-center text-center">
-                <img src="/logo.png" 
+                <img src="/static/logo.png" 
                      onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';" 
                      alt="MerON Logo" 
                      class="h-16 sm:h-20 w-auto object-contain drop-shadow-md transition hover:scale-105">
@@ -183,7 +183,7 @@
                                 <p class="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">{{ ep.title }}</p>
                                 <p class="text-[10px] text-slate-400 truncate">{{ ep.author }} • <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ ep.category }}</span></p>
                             </div>
-                            <button onclick="playAudio('{{ ep.audio_url }}', '{{ ep.title }}', '/logo.png', '{{ ep.author }}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">▶</button>
+                            <button onclick="playAudio('{{ ep.audio_url }}', '{{ ep.title }}', '/static/logo.png', '{{ ep.author }}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">▶</button>
                         </div>
                         {% else %}
                         <p class="text-slate-400 dark:text-slate-500 text-xs">Nessun episodio caricato finora.</p>
@@ -208,7 +208,7 @@
                      style="background: radial-gradient(circle, #1e293b 0%, #0f172a 35%, #020617 70%, #000 100%), repeating-radial-gradient(circle, transparent 0px, transparent 3px, rgba(255,255,255,0.03) 4px, transparent 5px);">
                     
                     <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-slate-700 shadow-inner flex items-center justify-center relative">
-                        <img id="vinyl-img" src="/logo.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=MerON';" class="w-full h-full object-cover">
+                        <img id="vinyl-img" src="/static/logo.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=MerON';" class="w-full h-full object-cover">
                         <div class="absolute w-4 h-4 rounded-full bg-slate-900 border border-slate-600 shadow-md"></div>
                     </div>
                 </div>
@@ -250,7 +250,7 @@
         <div class="w-full px-2 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3">
             
             <div class="flex items-center gap-3 w-full md:w-1/4 cursor-pointer" onclick="openVinylModal()">
-                <img id="player-img" src="/logo.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=MerON';" class="w-12 h-12 rounded-xl object-cover shadow-sm border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                <img id="player-img" src="/static/logo.png" onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=MerON';" class="w-12 h-12 rounded-xl object-cover shadow-sm border border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <div class="truncate">
                     <p id="player-title" class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">Seleziona un episodio</p>
                     <p id="player-subtitle" class="text-[11px] text-slate-400 dark:text-slate-500 truncate">Clicca per schermata vinile 🎵</p>
@@ -356,7 +356,7 @@
             }
         }
 
-        function playAudio(url, title, image = '/logo.png', author = 'MerON Podcast') {
+        function playAudio(url, title, image = '/static/logo.png', author = 'MerON Podcast') {
             player.src = url;
             playerTitle.innerText = title;
             playerImg.src = image;
