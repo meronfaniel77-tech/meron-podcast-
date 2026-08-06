@@ -9,6 +9,9 @@ import requests
 
 app = FastAPI()
 
+# Permette a FastAPI di servire il logo e altri file statici dalla radice
+app.mount("/logo.png", StaticFiles(filename="logo.png"), name="logo")
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -51,13 +54,11 @@ async def get_top_podcasts():
             entries = data.get("feed", {}).get("entry", [])
             results = []
             for entry in entries:
-                # Estraiamo l'ID di iTunes per recuperare il feed RSS
                 podcast_id = entry["id"]["attributes"]["im:id"]
                 title = entry["im:name"]["label"]
                 author = entry["im:artist"]["label"]
                 image = entry["im:image"][2]["label"]
 
-                # Recupera dettagli (incluso feedUrl) tramite lookup
                 lookup_url = (
                     f"https://itunes.apple.com/lookup?id={podcast_id}"
                 )
