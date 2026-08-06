@@ -15,22 +15,30 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-32" onload="initApp()">
 
-    <!-- HEADER FLUIDO (LARGHEZZA TOTALE) -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/90">
-        <div class="w-full px-4 sm:px-8 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
+    <!-- HEADER FLUIDO CON LOGO GRANDE AL CENTRO -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/90 py-2">
+        <div class="w-full px-4 sm:px-8 grid grid-cols-3 items-center">
+            
+            <!-- Lato Sinistro -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest hidden md:inline">Platform</span>
+            </div>
+
+            <!-- Centro (Logo Più Grande e Ben Visibile) -->
+            <div class="flex flex-col items-center justify-center text-center">
                 <img src="/logo.png" 
                      onerror="this.onerror=null; this.src='/logo.jpg';" 
                      alt="MerON Logo" 
-                     class="h-12 w-auto object-contain rounded-xl shadow-sm border border-slate-100">
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Mer<span class="text-indigo-600">ON</span></h1>
-                    <p class="text-slate-500 text-xs font-medium hidden sm:block">Podcast con Meron</p>
-                </div>
+                     class="h-20 sm:h-24 w-auto object-contain drop-shadow-md transition hover:scale-105">
             </div>
-            <a href="#upload-section" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-full shadow-md shadow-indigo-200 transition flex items-center gap-1.5">
-                <span>➕</span> <span class="hidden sm:inline">Carica</span> Episodio
-            </a>
+
+            <!-- Lato Destro (Pulsante Carica) -->
+            <div class="flex justify-end">
+                <a href="#upload-section" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-full shadow-md shadow-indigo-200 transition flex items-center gap-1.5 whitespace-nowrap">
+                    <span>➕</span> <span class="hidden sm:inline">Carica</span> Episodio
+                </a>
+            </div>
+
         </div>
     </header>
 
@@ -68,10 +76,10 @@
             </div>
         </section>
 
-        <!-- LAYOUT 4/5 + 1/5 PER SFRUTTARE TUTTA LA LARGHEZZA -->
+        <!-- LAYOUT 3/4 + 1/4 PER SFRUTTARE TUTTA LA LARGHEZZA -->
         <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
             
-            <!-- SEZIONE PRINCIPALE PODCAST (3 COLONNE SU DESKTOP GRANDE) -->
+            <!-- SEZIONE PRINCIPALE PODCAST -->
             <div class="xl:col-span-3 space-y-6">
                 
                 <!-- PREFERITI -->
@@ -106,7 +114,7 @@
 
             </div>
 
-            <!-- COLONNA LATERALE (CARICAMENTO & I TUOI EPISODI) -->
+            <!-- COLONNA LATERALE (CARICAMENTO & EPISODI SALVATI) -->
             <div class="space-y-6">
                 
                 <section id="upload-section" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
