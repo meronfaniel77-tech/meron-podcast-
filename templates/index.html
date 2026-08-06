@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎙️ MerON - Podcast con Meron</title>
-
+    
     <!-- PWA Config -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4f46e5">
@@ -95,13 +95,13 @@
         <section class="space-y-2">
             <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Esplora Categorie</h3>
             <div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
-                <button onclick="loadTopPodcasts()" class="cat-btn bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">🔥 Tutti i Popolari</button>
-                <button onclick="searchQuery('True Crime')" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">🔍 True Crime & Gialli</button>
-                <button onclick="searchQuery('Notizie')" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">📰 Notizie & Politica</button>
-                <button onclick="searchQuery('Tecnologia')" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">💻 Tecnologia</button>
-                <button onclick="searchQuery('Sport')" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">⚽ Sport</button>
-                <button onclick="searchQuery('Commedia')" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">🎭 Commedia & Humor</button>
-                <button onclick="searchQuery('Storia')" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">📚 Cultura & Storia</button>
+                <button onclick="loadCategory('', this)" class="cat-btn bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">🔥 Tutti i Popolari</button>
+                <button onclick="loadCategory('1315', this)" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">🔍 True Crime & Gialli</button>
+                <button onclick="loadCategory('1489', this)" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">📰 Notizie & Politica</button>
+                <button onclick="loadCategory('1318', this)" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">💻 Tecnologia</button>
+                <button onclick="loadCategory('1545', this)" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">⚽ Sport</button>
+                <button onclick="loadCategory('1303', this)" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">🎭 Commedia & Humor</button>
+                <button onclick="loadCategory('1304', this)" class="cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition">📚 Cultura & Storia</button>
             </div>
         </section>
 
@@ -119,10 +119,20 @@
                     </div>
                 </div>
 
-                <!-- GRIGLIA ESPANSA PODCAST -->
+                <!-- GRIGLIA ESPANSA PODCAST CON SKELETON LOADING -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
                     <h3 id="results-title" class="text-base font-extrabold text-slate-900 dark:text-slate-100 mb-4">🔥 Top Podcast del Momento</h3>
-                    <div id="search-results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+                    
+                    <div id="search-results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Skeleton loader generato via JS -->
+                    </div>
+
+                    <!-- PULSANTE PAGINAZIONE / CARICA ALTRI -->
+                    <div id="load-more-container" class="mt-6 text-center hidden">
+                        <button onclick="renderNextPage()" class="bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-600 text-indigo-600 dark:text-indigo-400 font-bold px-6 py-2.5 rounded-full text-xs transition border border-slate-200 dark:border-slate-600">
+                            🔄 Carica Altri Podcast
+                        </button>
+                    </div>
                 </div>
 
                 <!-- EPISODI SELEZIONATI -->
@@ -131,6 +141,11 @@
                         <h3 id="selected-podcast-title" class="text-base font-bold text-indigo-600 dark:text-indigo-400 truncate"></h3>
                         <button onclick="closeEpisodes()" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg">✕ Chiudi</button>
                     </div>
+
+                    <input type="text" id="filter-episodes-input" onkeyup="filterEpisodes()" 
+                           placeholder="⚡ Filtra tra gli episodi..." 
+                           class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+
                     <div id="episodes-list" class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1"></div>
                 </div>
 
@@ -142,7 +157,7 @@
                 <section id="upload-section" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4 transition-colors">
                     <h2 class="text-base font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">🎙️ <span>Carica Episodio</span></h2>
                     
-                    <form id="upload-form" onsubmit="alert('Funzione di caricamento salvata in locale!'); return false;" class="space-y-3">
+                    <form id="upload-form" onsubmit="alert('Funzione di salvataggio in locale pronta!'); return false;" class="space-y-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Titolo Episodio</label>
                             <input type="text" id="title" required class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:border-emerald-500 dark:text-white">
@@ -152,6 +167,17 @@
                             <input type="text" id="author" required class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:border-emerald-500 dark:text-white">
                         </div>
                         <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Categoria</label>
+                            <select id="category" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200">
+                                <option value="Generale">Generale</option>
+                                <option value="True Crime">True Crime</option>
+                                <option value="Notizie">Notizie</option>
+                                <option value="Tecnologia">Tecnologia</option>
+                                <option value="Sport">Sport</option>
+                                <option value="Commedia">Commedia</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">File Audio (MP3)</label>
                             <input type="file" id="audio-file" accept="audio/*" required class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 dark:file:bg-emerald-950 file:text-emerald-700 dark:file:text-emerald-400">
                         </div>
@@ -159,21 +185,48 @@
                     </form>
                 </section>
 
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Episodi Caricati da Te</h3>
+                    <div id="user-episodes" class="space-y-2 max-h-[300px] overflow-y-auto">
+                        {% for ep in user_episodes %}
+                        <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <div class="truncate max-w-[150px]">
+                                <p class="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">{{ ep.title }}</p>
+                                <p class="text-[10px] text-slate-400 truncate">{{ ep.author }} • <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ ep.category }}</span></p>
+                            </div>
+                            <button onclick="playAudio('{{ ep.audio_url }}', '{{ ep.title }}', '/logo.png', '{{ ep.author }}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">▶</button>
+                        </div>
+                        {% else %}
+                        <p class="text-slate-400 dark:text-slate-500 text-xs">Nessun episodio caricato finora.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
     </main>
 
-    <!-- MODALE VINILE -->
+    <!-- MODALE / PLAYER VINILE IMMERSIVO CON CONTROLLI DISPOSTI SOTTO -->
     <div id="vinyl-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl transition-all duration-500 overflow-hidden">
+        
+        <!-- Sfondo Ambientale Sfocato -->
         <div id="vinyl-bg-blur" class="absolute inset-0 bg-cover bg-center blur-3xl opacity-40 scale-125 transition-all duration-700 pointer-events-none"></div>
-        <button onclick="closeVinylModal()" class="absolute top-6 left-6 z-20 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-md transition">✕</button>
 
+        <!-- Pulsante Chiudi Modal -->
+        <button onclick="closeVinylModal()" class="absolute top-6 left-6 z-20 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-md transition">
+            ✕
+        </button>
+
+        <!-- Contenitore Centrale (Vinile sopra, Info al centro, Controlli sotto) -->
         <div class="relative z-10 flex flex-col items-center justify-center max-w-sm w-full text-center space-y-6">
+            
+            <!-- 1. DISCO VINILE IN ALTO -->
             <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
                 <div id="vinyl-disc" class="w-full h-full rounded-full bg-slate-950 shadow-2xl border-4 border-slate-800/60 flex items-center justify-center relative animate-vinyl paused-vinyl transition-all"
-                     style="background: radial-gradient(circle, #1e293b 0%, #0f172a 35%, #020617 70%, #000 100%);">
+                     style="background: radial-gradient(circle, #1e293b 0%, #0f172a 35%, #020617 70%, #000 100%), repeating-radial-gradient(circle, transparent 0px, transparent 3px, rgba(255,255,255,0.03) 4px, transparent 5px);">
+                    
                     <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-slate-700 shadow-inner flex items-center justify-center relative">
                         <img id="vinyl-img" src="/logo.png" onerror="this.src='https://via.placeholder.com/150?text=MerON';" class="w-full h-full object-cover">
                         <div class="absolute w-4 h-4 rounded-full bg-slate-900 border border-slate-600 shadow-md"></div>
@@ -181,11 +234,13 @@
                 </div>
             </div>
 
+            <!-- 2. TITOLO ED AUTORE SOTTO IL VINILE -->
             <div class="space-y-1 px-4">
                 <h2 id="vinyl-title" class="text-xl sm:text-2xl font-black text-white leading-tight drop-shadow-md">Titolo Episodio</h2>
                 <p id="vinyl-author" class="text-xs sm:text-sm font-semibold text-slate-300 drop-shadow">Autore Podcast</p>
             </div>
 
+            <!-- 3. BARRA DI AVANZAMENTO (SEEKBAR) -->
             <div class="w-full px-2 space-y-1">
                 <input type="range" id="vinyl-seekbar" min="0" value="0" step="0.1" oninput="seekAudio(this.value)" class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-500">
                 <div class="flex justify-between text-[10px] text-slate-300 font-mono">
@@ -194,17 +249,49 @@
                 </div>
             </div>
 
+            <!-- 4. CONTROLLI MEDIA SOTTO IL VINILE (SEPARATI DAL VINILE) -->
             <div class="flex items-center justify-between bg-white/10 px-5 py-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl w-full">
-                <button onclick="skipTime(-15)" class="text-white hover:text-indigo-300 text-sm font-bold p-1">⏪ -15s</button>
-                <button id="vinyl-play-btn" onclick="togglePlayPause()" class="w-12 h-12 bg-white text-slate-900 rounded-full flex items-center justify-center text-xl font-black shadow-lg hover:scale-110 active:scale-95 transition">▶</button>
-                <button onclick="skipTime(15)" class="text-white hover:text-indigo-300 text-sm font-bold p-1">+15s ⏩</button>
+                
+                <!-- Selettore Velocità -->
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-300">⚡</span>
+                    <select id="vinyl-speed-select" onchange="changeSpeed(this.value)" class="bg-transparent text-white text-xs font-bold outline-none cursor-pointer">
+                        <option value="1" class="text-slate-900" selected>1.0x</option>
+                        <option value="1.25" class="text-slate-900">1.25x</option>
+                        <option value="1.5" class="text-slate-900">1.5x</option>
+                        <option value="2" class="text-slate-900">2.0x</option>
+                    </select>
+                </div>
+
+                <!-- Indietro -15s -->
+                <button onclick="skipTime(-15)" title="Indietro 15 secondi" class="text-white hover:text-indigo-300 text-sm font-bold transition p-1">
+                    ⏪ -15s
+                </button>
+
+                <!-- PULSANTE PLAY / PAUSA GRANDE -->
+                <button id="vinyl-play-btn" onclick="togglePlayPause()" class="w-12 h-12 bg-white text-slate-900 rounded-full flex items-center justify-center text-xl font-black shadow-lg hover:scale-110 active:scale-95 transition">
+                    ▶
+                </button>
+
+                <!-- Avanti +15s -->
+                <button onclick="skipTime(15)" title="Avanti 15 secondi" class="text-white hover:text-indigo-300 text-sm font-bold transition p-1">
+                    +15s ⏩
+                </button>
+
+                <!-- Pulsante Minimizza -->
+                <button onclick="closeVinylModal()" title="Minimizza" class="text-xs text-slate-300 hover:text-white font-semibold p-1">
+                    🔽
+                </button>
             </div>
+
         </div>
     </div>
 
-    <!-- PLAYER FISSO IN BASSO -->
+    <!-- PLAYER AUDIO FULL WIDTH IN BASSO -->
     <div class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 p-3 sm:p-4 shadow-2xl z-40 transition-colors">
         <div class="w-full px-2 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Info Brano (Cliccabile per riaprire il vinile) -->
             <div class="flex items-center gap-3 w-full md:w-1/4 cursor-pointer" onclick="openVinylModal()">
                 <img id="player-img" src="/logo.png" onerror="this.src='https://via.placeholder.com/150?text=MerON';" class="w-12 h-12 rounded-xl object-cover shadow-sm border border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <div class="truncate">
@@ -213,19 +300,40 @@
                 </div>
             </div>
 
+            <!-- Controlli Extra Player In Basso -->
+            <div class="flex items-center gap-3">
+                <button onclick="skipTime(-15)" title="Indietro 15s" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-xs font-bold text-slate-700 dark:text-slate-200 transition">
+                    ⏪ -15s
+                </button>
+                <button onclick="skipTime(15)" title="Avanti 15s" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-xs font-bold text-slate-700 dark:text-slate-200 transition">
+                    +15s ⏩
+                </button>
+                <select id="speed-select" onchange="changeSpeed(this.value)" class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold p-2 rounded-xl border-none outline-none cursor-pointer">
+                    <option value="1" selected>1.0x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2.0x</option>
+                </select>
+            </div>
+
+            <!-- HTML5 Audio Tag Integrato -->
             <audio id="global-player" controls class="w-full md:w-1/2 h-10"></audio>
+
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- LOGICA JAVASCRIPT AVANZATA -->
     <script>
+        // Registrazione Service Worker PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration error:', err));
         }
 
         const player = document.getElementById('global-player');
         const playerTitle = document.getElementById('player-title');
+        const playerSubtitle = document.getElementById('player-subtitle');
         const playerImg = document.getElementById('player-img');
+
         const vinylModal = document.getElementById('vinyl-modal');
         const vinylDisc = document.getElementById('vinyl-disc');
         const vinylImg = document.getElementById('vinyl-img');
@@ -237,23 +345,31 @@
         const vinylCurrentTime = document.getElementById('vinyl-current-time');
         const vinylDurationTime = document.getElementById('vinyl-duration-time');
 
-        let favorites = JSON.parse(localStorage.getItem('meron_favs')) || [];
+        let favorites = JSON.parse(localStorage.getItem('meron_favorites')) || [];
+        let allPodcastResults = [];
+        let currentEpisodesList = [];
+        let currentPage = 1;
+        const pageSize = 6;
 
         function initApp() {
             if (localStorage.getItem('meron_theme') === 'dark') {
                 document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').innerText = '☀️';
+                document.getElementById('theme-text').innerText = 'Light Mode';
             }
             renderFavorites();
-            loadTopPodcasts();
+            loadCategory('');
 
             player.addEventListener('play', () => {
                 vinylDisc.classList.remove('paused-vinyl');
                 vinylPlayBtn.innerText = '⏸';
             });
+
             player.addEventListener('pause', () => {
                 vinylDisc.classList.add('paused-vinyl');
                 vinylPlayBtn.innerText = '▶';
             });
+
             player.addEventListener('timeupdate', () => {
                 if (!isNaN(player.duration)) {
                     vinylSeekbar.max = player.duration;
@@ -264,162 +380,236 @@
             });
         }
 
-        function formatTime(s) {
-            const m = Math.floor(s / 60);
-            const sec = Math.floor(s % 60);
-            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        function togglePlayPause() { player.paused ? player.play() : player.pause(); }
-        function seekAudio(v) { player.currentTime = v; }
-        function skipTime(s) { player.currentTime += s; }
+        function togglePlayPause() {
+            if (player.paused) player.play();
+            else player.pause();
+        }
+
+        function seekAudio(val) { player.currentTime = val; }
 
         function toggleDarkMode() {
             const html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('meron_theme', html.classList.contains('dark') ? 'dark' : 'light');
-        }
-
-        async function loadTopPodcasts() {
-            showSkeleton();
-            try {
-                const res = await fetch('/api/top-podcasts');
-                const data = await res.json();
-                renderPodcasts(data, "🔥 Top Podcast del Momento");
-            } catch(e) {
-                document.getElementById('search-results').innerHTML = '<p class="text-xs text-red-400">Errore nel caricamento.</p>';
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('meron_theme', 'light');
+                document.getElementById('theme-icon').innerText = '🌙';
+                document.getElementById('theme-text').innerText = 'Dark Mode';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('meron_theme', 'dark');
+                document.getElementById('theme-icon').innerText = '☀️';
+                document.getElementById('theme-text').innerText = 'Light Mode';
             }
         }
 
-        async function searchQuery(q) {
-            document.getElementById('search-input').value = q;
-            searchPodcasts();
-        }
-
-        async function searchPodcasts() {
-            const q = document.getElementById('search-input').value;
-            if(!q) return;
-            showSkeleton();
-            try {
-                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-                const data = await res.json();
-                renderPodcasts(data, `🔍 Risultati per: "${q}"`);
-            } catch(e) {
-                document.getElementById('search-results').innerHTML = '<p class="text-xs text-red-400">Errore nella ricerca.</p>';
-            }
-        }
-
-        function renderPodcasts(items, title) {
-            document.getElementById('results-title').innerText = title;
-            const c = document.getElementById('search-results');
-            c.innerHTML = '';
-            if(!items || items.length === 0) {
-                c.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Nessun podcast trovato.</p>';
-                return;
-            }
-            items.forEach(item => {
-                const isFav = favorites.some(f => f.id === item.id);
-                const div = document.createElement('div');
-                div.className = 'p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 flex flex-col justify-between hover:scale-[1.02] transition shadow-sm';
-                div.innerHTML = `
-                    <div class="flex items-center gap-3 cursor-pointer" onclick="loadEpisodes('${item.id}', \`${item.title.replace(/`/g, '')}\`)">
-                        <img src="${item.image}" class="w-14 h-14 rounded-lg object-cover">
-                        <div class="truncate">
-                            <h4 class="font-bold text-xs dark:text-white truncate">${item.title}</h4>
-                            <p class="text-[10px] text-slate-400 truncate">${item.artist}</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex justify-between items-center border-t border-slate-200/40 dark:border-slate-800 pt-2">
-                        <button onclick="loadEpisodes('${item.id}', \`${item.title.replace(/`/g, '')}\`)" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Episodi ➔</button>
-                        <button onclick="toggleFav('${item.id}', \`${item.title.replace(/`/g, '')}\`, '${item.image}')" class="text-sm">${isFav ? '❤️' : '🤍'}</button>
-                    </div>
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        async function loadEpisodes(id, title) {
-            const container = document.getElementById('episodes-container');
-            const list = document.getElementById('episodes-list');
-            document.getElementById('selected-podcast-title').innerText = title;
-            list.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Caricamento episodi...</p>';
-            container.classList.remove('hidden');
-            container.scrollIntoView({ behavior: 'smooth' });
-
-            try {
-                const res = await fetch(`/api/podcast-details?id=${id}`);
-                const data = await res.json();
-                list.innerHTML = '';
-
-                if(!data.episodes || data.episodes.length === 0) {
-                    list.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Nessun episodio trovato.</p>';
-                    return;
-                }
-
-                data.episodes.forEach(ep => {
-                    if(!ep.audio_url) return;
-                    const div = document.createElement('div');
-                    div.className = 'p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center';
-                    div.innerHTML = `
-                        <div class="truncate max-w-[75%]">
-                            <p class="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">${ep.title}</p>
-                        </div>
-                        <button onclick="playAudio('${ep.audio_url}', \`${ep.title.replace(/`/g, '')}\`, '${data.image}', \`${data.artist.replace(/`/g, '')}\`)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">▶ Ascolta</button>
-                    `;
-                    list.appendChild(div);
-                });
-            } catch(e) {
-                list.innerHTML = '<p class="text-xs text-red-400 col-span-full">Errore caricamento episodi.</p>';
-            }
-        }
-
-        function playAudio(url, title, img, author) {
+        function playAudio(url, title, image = '/logo.png', author = 'MerON Podcast') {
             player.src = url;
             playerTitle.innerText = title;
-            playerImg.src = img;
+            playerImg.src = image;
+
             vinylTitle.innerText = title;
             vinylAuthor.innerText = author;
-            vinylImg.src = img;
-            vinylBgBlur.style.backgroundImage = `url('${img}')`;
+            vinylImg.src = image;
+            vinylBgBlur.style.backgroundImage = `url('${image}')`;
+
+            const speed = document.getElementById('speed-select').value;
+            player.playbackRate = parseFloat(speed);
+            document.getElementById('vinyl-speed-select').value = speed;
+            
             player.play();
             openVinylModal();
         }
 
-        function openVinylModal() { if(player.src) vinylModal.classList.remove('hidden'); }
+        function openVinylModal() { if (player.src) vinylModal.classList.remove('hidden'); }
         function closeVinylModal() { vinylModal.classList.add('hidden'); }
-        function closeEpisodes() { document.getElementById('episodes-container').classList.add('hidden'); }
+        function skipTime(seconds) { player.currentTime += seconds; }
 
-        function toggleFav(id, title, image) {
-            const idx = favorites.findIndex(f => f.id === id);
-            if(idx > -1) { favorites.splice(idx, 1); }
-            else { favorites.push({id, title, image}); }
-            localStorage.setItem('meron_favs', JSON.stringify(favorites));
+        function changeSpeed(val) {
+            player.playbackRate = parseFloat(val);
+            document.getElementById('speed-select').value = val;
+            document.getElementById('vinyl-speed-select').value = val;
+        }
+
+        function showSkeletonLoading() {
+            const container = document.getElementById('search-results');
+            container.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'p-3 bg-slate-200 dark:bg-slate-700/50 rounded-xl animate-pulse flex items-center gap-3 h-16';
+                skeleton.innerHTML = `
+                    <div class="w-12 h-12 bg-slate-300 dark:bg-slate-600 rounded-xl"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-3 bg-slate-300 dark:bg-slate-600 rounded w-3/4"></div>
+                        <div class="h-2 bg-slate-300 dark:bg-slate-600 rounded w-1/2"></div>
+                    </div>
+                `;
+                container.appendChild(skeleton);
+            }
+        }
+
+        async function loadCategory(genreId, btnElement = null) {
+            if (btnElement) {
+                document.querySelectorAll('.cat-btn').forEach(b => {
+                    b.className = 'cat-btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition';
+                });
+                btnElement.className = 'cat-btn bg-indigo-600 text-white px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition';
+            }
+
+            showSkeletonLoading();
+            const res = await fetch(`/api/top-podcasts?genre_id=${genreId}`);
+            const data = await res.json();
+            allPodcastResults = data.results || [];
+            currentPage = 1;
+            renderPodcastList("🔥 Top Podcast del Momento");
+        }
+
+        async function searchPodcasts() {
+            const query = document.getElementById('search-input').value;
+            if (!query) return;
+
+            showSkeletonLoading();
+            const res = await fetch(`/api/search?term=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            allPodcastResults = data.results || [];
+            currentPage = 1;
+            renderPodcastList(`🔍 Risultati per: "${query}"`);
+        }
+
+        function renderPodcastList(title) {
+            document.getElementById('results-title').innerText = title;
+            const container = document.getElementById('search-results');
+            
+            if (currentPage === 1) container.innerHTML = '';
+
+            if (!allPodcastResults || allPodcastResults.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-xs col-span-full">Nessun podcast trovato.</p>';
+                document.getElementById('load-more-container').classList.add('hidden');
+                return;
+            }
+
+            const itemsToShow = allPodcastResults.slice(0, currentPage * pageSize);
+
+            container.innerHTML = '';
+            itemsToShow.forEach((item) => {
+                if (!item.feedUrl) return;
+
+                const isFav = favorites.some(f => f.feedUrl === item.feedUrl);
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/60 hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700/70 transition cursor-pointer shadow-sm';
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1 min-w-0" onclick="loadEpisodes('${item.feedUrl}', \`${item.collectionName.replace(/`/g, '')}\`, '${item.artworkUrl60}', \`${item.artistName.replace(/`/g, '')}\`)">
+                        <img src="${item.artworkUrl60}" onerror="this.src='https://via.placeholder.com/150?text=MerON';" class="w-12 h-12 rounded-xl object-cover shadow-sm">
+                        <div class="truncate">
+                            <p class="font-bold text-xs text-slate-800 dark:text-slate-100 truncate">${item.collectionName}</p>
+                            <p class="text-[10px] text-slate-400 truncate">${item.artistName}</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleFav('${item.feedUrl}', \`${item.collectionName.replace(/`/g, '')}\`, '${item.artworkUrl60}', \`${item.artistName.replace(/`/g, '')}\`)" class="p-2 text-sm">
+                        ${isFav ? '❤️' : '🤍'}
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            if (allPodcastResults.length > itemsToShow.length) {
+                document.getElementById('load-more-container').classList.remove('hidden');
+            } else {
+                document.getElementById('load-more-container').classList.add('hidden');
+            }
+        }
+
+        function renderNextPage() {
+            currentPage++;
+            renderPodcastList(document.getElementById('results-title').innerText);
+        }
+
+        async function loadEpisodes(feedUrl, collectionName, artworkUrl, artistName) {
+            const container = document.getElementById('episodes-container');
+            const list = document.getElementById('episodes-list');
+            document.getElementById('selected-podcast-title').innerText = collectionName;
+            list.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Caricamento episodi in corso...</p>';
+            container.classList.remove('hidden');
+            container.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                const res = await fetch(`/api/episodes?feedUrl=${encodeURIComponent(feedUrl)}`);
+                const data = await res.json();
+                currentEpisodesList = data.episodes || [];
+                renderEpisodes(currentEpisodesList, artworkUrl, artistName);
+            } catch(e) {
+                list.innerHTML = '<p class="text-xs text-red-400 col-span-full">Errore nel caricamento degli episodi.</p>';
+            }
+        }
+
+        function renderEpisodes(episodes, artworkUrl, artistName) {
+            const list = document.getElementById('episodes-list');
+            list.innerHTML = '';
+            if (!episodes || episodes.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Nessun episodio disponibile per questo podcast.</p>';
+                return;
+            }
+
+            episodes.forEach(ep => {
+                if (!ep.audio_url) return;
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center';
+                div.innerHTML = `
+                    <div class="truncate max-w-[75%]">
+                        <p class="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">${ep.title}</p>
+                        <p class="text-[10px] text-slate-400">${ep.published || ''}</p>
+                    </div>
+                    <button onclick="playAudio('${ep.audio_url}', \`${ep.title.replace(/`/g, '')}\`, '${artworkUrl}', \`${artistName.replace(/`/g, '')}\`)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+                        ▶ Ascolta
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function filterEpisodes() {
+            const query = document.getElementById('filter-episodes-input').value.toLowerCase();
+            const filtered = currentEpisodesList.filter(ep => ep.title.toLowerCase().includes(query));
+            renderEpisodes(filtered, playerImg.src, vinylAuthor.innerText);
+        }
+
+        function closeEpisodes() {
+            document.getElementById('episodes-container').classList.add('hidden');
+        }
+
+        function toggleFav(feedUrl, title, image, author) {
+            const idx = favorites.findIndex(f => f.feedUrl === feedUrl);
+            if (idx > -1) favorites.splice(idx, 1);
+            else favorites.push({ feedUrl, title, image, author });
+            
+            localStorage.setItem('meron_favorites', JSON.stringify(favorites));
             renderFavorites();
-            loadTopPodcasts();
+            renderPodcastList(document.getElementById('results-title').innerText);
         }
 
         function renderFavorites() {
             const c = document.getElementById('favorites-list');
-            if(favorites.length === 0) {
-                c.innerHTML = '<p class="text-slate-400 text-xs">Nessun preferito salvato.</p>';
+            if (favorites.length === 0) {
+                c.innerHTML = '<p class="text-slate-400 dark:text-slate-500 text-xs">Nessun preferito salvato.</p>';
                 return;
             }
             c.innerHTML = '';
             favorites.forEach(f => {
                 const div = document.createElement('div');
-                div.className = 'flex-shrink-0 flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-700 rounded-xl cursor-pointer';
-                div.onclick = () => loadEpisodes(f.id, f.title);
+                div.className = 'flex-shrink-0 flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-xl cursor-pointer hover:bg-indigo-50 dark:hover:bg-slate-600 transition';
+                div.onclick = () => loadEpisodes(f.feedUrl, f.title, f.image, f.author);
                 div.innerHTML = `
                     <img src="${f.image}" class="w-8 h-8 rounded-lg object-cover">
-                    <span class="text-xs font-bold dark:text-white max-w-[100px] truncate">${f.title}</span>
+                    <span class="text-xs font-bold dark:text-white max-w-[120px] truncate">${f.title}</span>
                 `;
                 c.appendChild(div);
             });
-        }
-
-        function showSkeleton() {
-            const c = document.getElementById('search-results');
-            c.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Caricamento in corso...</p>';
         }
     </script>
 </body>
