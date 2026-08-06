@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙️ MerON - Podcast con Meron</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen pb-24" onload="initApp()">
+
+    <!-- Header con Logo Personalizzato -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <!-- Fallback automatico tra logo.png e logo.jpg -->
+                <img src="/audio/logo.png" 
+                     onerror="this.onerror=null; this.src='/audio/logo.jpg';" 
+                     alt="MerON Logo" 
+                     class="h-14 w-auto object-contain rounded-lg border border-slate-700 shadow-md">
+                <div>
+                    <h1 class="text-2xl font-bold text-white tracking-wide">Mer<span class="text-indigo-400">ON</span></h1>
+                    <p class="text-slate-400 text-xs">Podcast con Meron</p>
+                </div>
+            </div>
+            <p class="text-slate-400 text-sm hidden sm:block">Ascolta & Crea il tuo Podcast</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- SEZIONE 1: CERCA, POPOLARI E PREFERITI -->
+        <section class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-6">
+            
+            <!-- Barra di Ricerca -->
+            <div>
+                <h2 class="text-xl font-bold mb-3 text-indigo-300">🔍 Cerca Podcast</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="search-input" placeholder="Es. Barbero, Elisa True Crime..." 
+                           class="w-full p-2.5 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500">
+                    <button onclick="searchPodcasts()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-medium">Cerca</button>
+                </div>
+            </div>
+
+            <!-- Sezione Preferiti -->
+            <div id="favorites-section">
+                <h3 class="text-md font-bold text-amber-400 mb-2 flex items-center gap-2">❤️ I Miei Preferiti</h3>
+                <div id="favorites-list" class="space-y-2">
+                    <p class="text-slate-500 text-xs">Nessun preferito salvato.</p>
+                </div>
+            </div>
+
+            <!-- Sezione Classifica / Risultati -->
+            <div>
+                <h3 id="results-title" class="text-md font-bold text-indigo-400 mb-3">🔥 Top Podcast del Momento</h3>
+                <div id="search-results" class="space-y-3">
+                    <p class="text-slate-500 text-xs">Caricamento classifica...</p>
+                </div>
+            </div>
+
+            <!-- Contenitore Episodi -->
+            <div id="episodes-container" class="mt-6 hidden border-t border-slate-700 pt-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 id="selected-podcast-title" class="text-md font-bold text-indigo-400 truncate max-w-[280px]"></h3>
+                    <button onclick="closeEpisodes()" class="text-xs text-slate-400 hover:text-white bg-slate-700 px-2 py-1 rounded">❌ Chiudi</button>
+                </div>
+
+                <input type="text" id="filter-episodes-input" onkeyup="filterEpisodes()" 
+                       placeholder="⚡ Filtra tra gli episodi..." 
+                       class="w-full mb-3 p-2 rounded bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+
+                <div id="episodes-list" class="space-y-2 max-h-[400px] overflow-y-auto pr-2"></div>
+            </div>
+        </section>
+
+        <!-- SEZIONE 2: CARICA I TUOI EPISODI -->
+        <section class="bg-slate-800 p-6 rounded-xl border border-slate-700 h-fit">
+            <h2 class="text-xl font-bold mb-4 text-emerald-400">➕ Carica il tuo Episodio</h2>
+            <form id="upload-form" onsubmit="uploadPodcast(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Titolo Episodio</label>
+                    <input type="text" id="title" required class="w-full p-2.5 rounded bg-slate-900 border border-slate-700 text-white">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Nome Autore / Canale</label>
+                    <input type="text" id="author" required class="w-full p-2.5 rounded bg-slate-900 border border-slate-700 text-white">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">File Audio (MP3)</label>
+                    <input type="file" id="audio-file" accept="audio/*" required class="w-full text-slate-400 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded font-medium transition">Pubblica Episodio</button>
+            </form>
+
+            <hr class="my-6 border-slate-700">
+
+            <h3 class="text-lg font-semibold mb-3 text-slate-300">I Tuoi Episodi Caricati</h3>
+            <div id="user-episodes" class="space-y-2">
+                {% for ep in user_episodes %}
+                <div class="p-3 bg-slate-900 rounded border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium text-sm">{{ ep.title }}</p>
+                        <p class="text-xs text-slate-400">Di {{ ep.author }}</p>
+                    </div>
+                    <button onclick="playAudio('{{ ep.audio_url }}', '{{ ep.title }}')" class="bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded text-xs text-emerald-400">▶ Riproduci</button>
+                </div>
+                {% else %}
+                <p class="text-slate-500 text-sm">Nessun episodio caricato finora.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PLAYER AUDIO FISSO -->
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 p-4 shadow-2xl">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div class="w-1/3">
+                <p id="player-title" class="font-medium truncate text-slate-300 text-sm">Nessun contenuto in riproduzione</p>
+            </div>
+            <audio id="global-player" controls class="w-2/3 max-w-md"></audio>
+        </div>
+    </div>
+
+    <!-- LOGICA JAVASCRIPT -->
+    <script>
+        const player = document.getElementById('global-player');
+        const playerTitle = document.getElementById('player-title');
+        let favorites = JSON.parse(localStorage.getItem('meron_favorites')) || [];
+        let currentPodcastsMap = {};
+
+        function initApp() {
+            renderFavorites();
+            loadTopPodcasts();
+        }
+
+        function playAudio(url, title) {
+            player.src = url;
+            playerTitle.innerText = title;
+            player.play();
+        }
+
+        // CARICA TOP PODCAST IN TENDENZA
+        async function loadTopPodcasts() {
+            const res = await fetch('/api/top-podcasts');
+            const data = await res.json();
+            renderPodcastList(data.results, "🔥 Top Podcast del Momento");
+        }
+
+        // RICERCA PODCAST
+        async function searchPodcasts() {
+            const query = document.getElementById('search-input').value;
+            if (!query) return;
+
+            const res = await fetch(`/api/search?term=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            renderPodcastList(data.results, "🔍 Risultati Ricerca");
+        }
+
+        // MOSTRA LISTA PODCAST
+        function renderPodcastList(items, title) {
+            document.getElementById('results-title').innerText = title;
+            const container = document.getElementById('search-results');
+            container.innerHTML = '';
+            currentPodcastsMap = {};
+
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-xs">Nessun podcast trovato.</p>';
+                return;
+            }
+
+            items.forEach((item, index) => {
+                if (!item.feedUrl) return;
+
+                currentPodcastsMap[index] = item;
+                const isFav = favorites.some(f => f.feedUrl === item.feedUrl);
+
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-slate-900 rounded border border-slate-700 hover:border-indigo-500 transition cursor-pointer';
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1 min-w-0" onclick="openPodcastFromMap(${index})">
+                        <img src="${item.artworkUrl60}" class="w-12 h-12 rounded">
+                        <div class="truncate">
+                            <p class="font-medium truncate text-sm text-slate-200">${item.collectionName}</p>
+                            <p class="text-xs text-slate-400 truncate">${item.artistName} • <span class="text-indigo-400">Clicca per episodi</span></p>
+                        </div>
+                    </div>
+                    <button onclick="toggleFavoriteFromMap(event, ${index})" class="ml-2 p-2 text-lg hover:scale-110 transition">
+                        ${isFav ? '❤️' : '🤍'}
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openPodcastFromMap(index) {
+            const item = currentPodcastsMap[index];
+            if (item) {
+                loadEpisodes(item.feedUrl, item.collectionName);
+            }
+        }
+
+        function toggleFavoriteFromMap(event, index) {
+            event.stopPropagation();
+            const item = currentPodcastsMap[index];
+            if (!item) return;
+
+            const favIndex = favorites.findIndex(f => f.feedUrl === item.feedUrl);
+            if (favIndex >= 0) {
+                favorites.splice(favIndex, 1);
+            } else {
+                favorites.push({ title: item.collectionName, feedUrl: item.feedUrl, image: item.artworkUrl60 });
+            }
+            localStorage.setItem('meron_favorites', JSON.stringify(favorites));
+            renderFavorites();
+
+            const currentTitle = document.getElementById('results-title').innerText;
+            if (currentTitle.includes("Top")) loadTopPodcasts(); else searchPodcasts();
+        }
+
+        function renderFavorites() {
+            const list = document.getElementById('favorites-list');
+            list.innerHTML = '';
+            if (favorites.length === 0) {
+                list.innerHTML = '<p class="text-slate-500 text-xs">Nessun preferito salvato. Clicca 🤍 per salvarne uno!</p>';
+                return;
+            }
+            favorites.forEach((fav) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-2 bg-slate-950 rounded border border-slate-800 text-xs';
+                div.innerHTML = `
+                    <div class="flex items-center gap-2 cursor-pointer truncate flex-1" onclick="loadEpisodes('${fav.feedUrl}', \`${fav.title}\`)">
+                        <img src="${fav.image}" class="w-7 h-7 rounded">
+                        <span class="font-medium text-slate-300 truncate">${fav.title}</span>
+                    </div>
+                    <button onclick="removeFavorite(event, '${fav.feedUrl}')" class="text-xs text-red-400 hover:text-red-300 ml-2">❌</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function removeFavorite(event, feedUrl) {
+            event.stopPropagation();
+            favorites = favorites.filter(f => f.feedUrl !== feedUrl);
+            localStorage.setItem('meron_favorites', JSON.stringify(favorites));
+            renderFavorites();
+            const currentTitle = document.getElementById('results-title').innerText;
+            if (currentTitle.includes("Top")) loadTopPodcasts(); else searchPodcasts();
+        }
+
+        // CARICA GLI EPISODI
+        async function loadEpisodes(feedUrl, podcastName) {
+            const container = document.getElementById('episodes-container');
+            const list = document.getElementById('episodes-list');
+            const titleHeader = document.getElementById('selected-podcast-title');
+            
+            titleHeader.innerText = `Episodi: ${podcastName}`;
+            list.innerHTML = '<p class="text-xs text-slate-400">Caricamento episodi in corso...</p>';
+            container.classList.remove('hidden');
+
+            document.getElementById('filter-episodes-input').value = '';
+
+            try {
+                const res = await fetch(`/api/episodes?feed_url=${encodeURIComponent(feedUrl)}`);
+                const data = await res.json();
+                list.innerHTML = '';
+
+                if (!data.episodes || data.episodes.length === 0) {
+                    list.innerHTML = '<p class="text-xs text-slate-500">Nessun episodio audio trovato per questo podcast.</p>';
+                    return;
+                }
+
+                data.episodes.forEach(ep => {
+                    const item = document.createElement('div');
+                    item.className = 'episode-item p-2.5 bg-slate-950 rounded flex justify-between items-center text-xs border border-slate-800';
+                    item.innerHTML = `
+                        <p class="font-medium truncate max-w-[250px] text-slate-300">${ep.title}</p>
+                        <button onclick="playAudio('${ep.audio_url}', \`${ep.title}\`)" class="bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 rounded font-semibold text-white transition">▶ Ascolta</button>
+                    `;
+                    list.appendChild(item);
+                });
+            } catch (e) {
+                list.innerHTML = '<p class="text-xs text-red-400">Errore nel caricamento degli episodi.</p>';
+            }
+        }
+
+        function filterEpisodes() {
+            const query = document.getElementById('filter-episodes-input').value.toLowerCase();
+            const items = document.querySelectorAll('.episode-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function closeEpisodes() {
+            document.getElementById('episodes-container').classList.add('hidden');
+        }
+
+        async function uploadPodcast(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('author', document.getElementById('author').value);
+            formData.append('file', document.getElementById('audio-file').files[0]);
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                alert('Episodio pubblicato con successo!');
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
