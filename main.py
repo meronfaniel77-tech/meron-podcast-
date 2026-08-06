@@ -1,168 +1,139 @@
-import os
-import shutil
-import sqlite3
 import feedparser
-from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 import requests
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
-app = FastAPI()
-
-# Database setup
-DB_FILE = "meron_podcast.db"
-
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_episodes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            author TEXT NOT NULL,
-            category TEXT DEFAULT 'Generale',
-            audio_url TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
-
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-app.mount("/audio", StaticFiles(directory=UPLOAD_DIR), name="audio")
-templates = Jinja2Templates(directory="templates")
+app = Flask(__name__)
 
 
-# --- ROTTA PER IL LOGO ---
-@app.get("/logo.png")
-async def get_logo():
-    if os.path.exists("logo.png"):
-        return FileResponse("logo.png")
-    elif os.path.exists("logo.jpg"):
-        return FileResponse("logo.jpg")
-    return {"error": "Logo non trovato"}
+# --- ROTTE PWA (MANIFEST E SERVICE WORKER) ---
+@app.route('/manifest.json')
+def manifest():
+  return send_from_directory('.', 'manifest.json')
 
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM user_episodes ORDER BY id DESC")
-    episodes = cursor.fetchall()
-    conn.close()
-    
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"user_episodes": episodes},
-    )
+@app.route('/sw.js')
+def service_worker():
+  return send_from_directory('.', 'sw.js')
 
 
-# --- API RICERCA E CATEGORIE PODCAST ---
-@app.get("/api/search")
-async def search_podcasts(term: str):
-    url = f"https://itunes.apple.com/search?term={term}&entity=podcast&limit=10"
-    try:
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            return response.json()
-    except Exception as e:
-        print(f"Errore ricerca: {e}")
-    return {"results": []}
+# --- ROTTE APPLICAZIONE ---
+@app.route('/')
+def index():
+  return render_template('index.html')
 
 
-# --- API TOP PODCAST PER CATEGORIA ---
-@app.get("/api/top-podcasts")
-async def get_top_podcasts(genre_id: str = ""):
-    url = "https://itunes.apple.com/it/rss/toppodcasts/limit=10/json"
-    if genre_id:
-        url = f"https://itunes.apple.com/it/rss/toppodcasts/limit=10/genre={genre_id}/json"
-        
-    try:
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            entries = data.get("feed", {}).get("entry", [])
-            results = []
-            
-            # Se la risposta è un singolo elemento anziché una lista
-            if isinstance(entries, dict):
-                entries = [entries]
+@app.route('/api/top-podcasts')
+def top_podcasts():
+  limit = request.args.get('limit', default=10, type=int)
+  url = f'https://itunes.apple.com/it/rss/toppodcasts/limit={limit}/json'
+  try:
+    res = requests.get(url, timeout=10)
+    data = res.json()
+    entries = data.get('feed', {}).get('entry', [])
 
-            for entry in entries:
-                podcast_id = entry["id"]["attributes"]["im:id"]
-                title = entry["im:name"]["label"]
-                author = entry["im:artist"]["label"]
-                image = entry["im:image"][2]["label"]
+    results = []
+    for entry in entries:
+      # Estrazione ID iTunes
+      podcast_id = entry.get('id', {}).get('attributes', {}).get('im:id', '')
 
-                lookup_url = f"https://itunes.apple.com/lookup?id={podcast_id}"
-                lookup_res = requests.get(lookup_url, timeout=5).json()
-                feed_url = ""
-                if lookup_res.get("results"):
-                    feed_url = lookup_res["results"][0].get("feedUrl", "")
+      # Immagine a risoluzione più alta se disponibile
+      images = entry.get('im:image', [])
+      image_url = images[-1]['label'] if images else ''
 
-                if feed_url:
-                    results.append(
-                        {
-                            "collectionName": title,
-                            "artistName": author,
-                            "artworkUrl60": image,
-                            "feedUrl": feed_url,
-                        }
-                    )
-            return {"results": results}
-    except Exception as e:
-        print(f"Errore Top Podcast: {e}")
-    return {"results": []}
+      results.append({
+          'id': podcast_id,
+          'title': entry.get('im:name', {}).get('label', ''),
+          'artist': entry.get('im:artist', {}).get('label', ''),
+          'image': image_url,
+      })
+    return jsonify(results)
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
-# --- API EPISODI ---
-@app.get("/api/episodes")
-async def get_episodes(feed_url: str):
-    parsed = feedparser.parse(feed_url)
+@app.route('/api/search')
+def search():
+  query = request.args.get('q', '')
+  if not query:
+    return jsonify([])
+
+  url = 'https://itunes.apple.com/search'
+  params = {'term': query, 'media': 'podcast', 'country': 'IT', 'limit': 15}
+  try:
+    res = requests.get(url, params=params, timeout=10)
+    data = res.json()
+    results = []
+    for item in data.get('results', []):
+      results.append({
+          'id': item.get('collectionId'),
+          'title': item.get('collectionName'),
+          'artist': item.get('artistName'),
+          'image': item.get('artworkUrl600') or item.get('artworkUrl100'),
+          'feedUrl': item.get('feedUrl'),
+      })
+    return jsonify(results)
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/podcast-details')
+def podcast_details():
+  podcast_id = request.args.get('id')
+  if not podcast_id:
+    return jsonify({'error': 'ID mancante'}), 400
+
+  url = 'https://itunes.apple.com/lookup'
+  params = {'id': podcast_id, 'country': 'IT'}
+  try:
+    res = requests.get(url, params=params, timeout=10)
+    data = res.json()
+    results = data.get('results', [])
+    if not results:
+      return jsonify({'error': 'Podcast non trovato'}), 404
+
+    podcast_data = results[0]
+    feed_url = podcast_data.get('feedUrl')
+
+    if not feed_url:
+      return jsonify({'error': 'Feed RSS non disponibile'}), 400
+
+    # Parsing del feed RSS con feedparser
+    feed = feedparser.parse(feed_url)
+
     episodes = []
+    for entry in feed.entries:
+      # Cerca l'enclosure audio
+      audio_url = None
+      if 'enclosures' in entry:
+        for enc in entry.enclosures:
+          if 'audio' in enc.get('type', ''):
+            audio_url = enc.get('href')
+            break
 
-    for entry in parsed.entries[:500]:
-        audio_url = None
-        if hasattr(entry, "enclosures"):
-            for enc in entry.enclosures:
-                if "audio" in enc.get("type", ""):
-                    audio_url = enc.get("href")
-                    break
+      # Se non lo trova nelle enclosures, cerca nei link
+      if not audio_url and 'links' in entry:
+        for link in entry.links:
+          if 'audio' in link.get('type', ''):
+            audio_url = link.get('href')
+            break
 
-        if audio_url:
-            episodes.append({"title": entry.title, "audio_url": audio_url})
+      episodes.append({
+          'title': entry.get('title', 'Senza titolo'),
+          'description': entry.get('summary', entry.get('description', '')),
+          'published': entry.get('published', ''),
+          'audio_url': audio_url,
+      })
 
-    return {"episodes": episodes}
+    return jsonify({
+        'title': podcast_data.get('collectionName'),
+        'artist': podcast_data.get('artistName'),
+        'image': podcast_data.get('artworkUrl600')
+        or podcast_data.get('artworkUrl100'),
+        'episodes': episodes,
+    })
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
 
-# --- API UPLOAD CON DATABASE ---
-@app.post("/api/upload")
-async def upload_episode(
-    title: str = Form(...),
-    author: str = Form(...),
-    category: str = Form("Generale"),
-    file: UploadFile = File(...),
-):
-    file_location = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_location, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    audio_url = f"/audio/{file.filename}"
-
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO user_episodes (title, author, category, audio_url) VALUES (?, ?, ?, ?)",
-        (title, author, category, audio_url)
-    )
-    conn.commit()
-    conn.close()
-
-    return {"status": "success"}
+if __name__ == '__main__':
+  app.run(host='0.0.0.0', port=5000, debug=True)
