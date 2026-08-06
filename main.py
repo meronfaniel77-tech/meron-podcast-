@@ -1,5 +1,6 @@
 import os
 import shutil
+import sqlite3
 import feedparser
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, FileResponse
@@ -9,13 +10,32 @@ import requests
 
 app = FastAPI()
 
+# Database setup
+DB_FILE = "meron_podcast.db"
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_episodes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            author TEXT NOT NULL,
+            category TEXT DEFAULT 'Generale',
+            audio_url TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.mount("/audio", StaticFiles(directory=UPLOAD_DIR), name="audio")
 templates = Jinja2Templates(directory="templates")
-
-user_episodes = []
 
 
 # --- ROTTA PER IL LOGO ---
@@ -30,17 +50,24 @@ async def get_logo():
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_episodes ORDER BY id DESC")
+    episodes = cursor.fetchall()
+    conn.close()
+    
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"user_episodes": user_episodes},
+        context={"user_episodes": episodes},
     )
 
 
-# --- API RICERCA PODCAST ---
+# --- API RICERCA E CATEGORIE PODCAST ---
 @app.get("/api/search")
 async def search_podcasts(term: str):
-    url = f"https://itunes.apple.com/search?term={term}&entity=podcast&limit=6"
+    url = f"https://itunes.apple.com/search?term={term}&entity=podcast&limit=10"
     try:
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
@@ -50,25 +77,31 @@ async def search_podcasts(term: str):
     return {"results": []}
 
 
-# --- API PODCAST IN TENDENZA (TOP 10 ITALIA) ---
+# --- API TOP PODCAST PER CATEGORIA ---
 @app.get("/api/top-podcasts")
-async def get_top_podcasts():
+async def get_top_podcasts(genre_id: str = ""):
     url = "https://itunes.apple.com/it/rss/toppodcasts/limit=10/json"
+    if genre_id:
+        url = f"https://itunes.apple.com/it/rss/toppodcasts/limit=10/genre={genre_id}/json"
+        
     try:
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
             entries = data.get("feed", {}).get("entry", [])
             results = []
+            
+            # Se la risposta è un singolo elemento anziché una lista
+            if isinstance(entries, dict):
+                entries = [entries]
+
             for entry in entries:
                 podcast_id = entry["id"]["attributes"]["im:id"]
                 title = entry["im:name"]["label"]
                 author = entry["im:artist"]["label"]
                 image = entry["im:image"][2]["label"]
 
-                lookup_url = (
-                    f"https://itunes.apple.com/lookup?id={podcast_id}"
-                )
+                lookup_url = f"https://itunes.apple.com/lookup?id={podcast_id}"
                 lookup_res = requests.get(lookup_url, timeout=5).json()
                 feed_url = ""
                 if lookup_res.get("results"):
@@ -109,23 +142,27 @@ async def get_episodes(feed_url: str):
     return {"episodes": episodes}
 
 
-# --- API UPLOAD ---
+# --- API UPLOAD CON DATABASE ---
 @app.post("/api/upload")
 async def upload_episode(
     title: str = Form(...),
     author: str = Form(...),
+    category: str = Form("Generale"),
     file: UploadFile = File(...),
 ):
     file_location = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    episode_data = {
-        "id": len(user_episodes) + 1,
-        "title": title,
-        "author": author,
-        "audio_url": f"/audio/{file.filename}",
-    }
-    user_episodes.append(episode_data)
+    audio_url = f"/audio/{file.filename}"
 
-    return {"status": "success", "episode": episode_data}
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO user_episodes (title, author, category, audio_url) VALUES (?, ?, ?, ?)",
+        (title, author, category, audio_url)
+    )
+    conn.commit()
+    conn.close()
+
+    return {"status": "success"}
