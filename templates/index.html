@@ -199,10 +199,10 @@
 
     </main>
 
-    <!-- MODALE / PLAYER VINILE IMMERSIVO STILE NOTIFICATIONS -->
-    <div id="vinyl-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-xl transition-all duration-500 overflow-hidden">
+    <!-- MODALE / PLAYER VINILE IMMERSIVO CON CONTROLLI DISPOSTI SOTTO -->
+    <div id="vinyl-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl transition-all duration-500 overflow-hidden">
         
-        <!-- Sfondo Ambientale Sfocato Dalla Copertina -->
+        <!-- Sfondo Ambientale Sfocato -->
         <div id="vinyl-bg-blur" class="absolute inset-0 bg-cover bg-center blur-3xl opacity-40 scale-125 transition-all duration-700 pointer-events-none"></div>
 
         <!-- Pulsante Chiudi Modal -->
@@ -210,33 +210,71 @@
             ✕
         </button>
 
-        <!-- Contenitore Centrale Vinile -->
+        <!-- Contenitore Centrale (Vinile sopra, Info al centro, Controlli sotto) -->
         <div class="relative z-10 flex flex-col items-center justify-center max-w-sm w-full text-center space-y-6">
             
-            <!-- Disco Vinile -->
-            <div class="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
-                <!-- Disco Nero con Solchi -->
+            <!-- 1. DISCO VINILE IN ALTO -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
                 <div id="vinyl-disc" class="w-full h-full rounded-full bg-slate-950 shadow-2xl border-4 border-slate-800/60 flex items-center justify-center relative animate-vinyl paused-vinyl transition-all"
                      style="background: radial-gradient(circle, #1e293b 0%, #0f172a 35%, #020617 70%, #000 100%), repeating-radial-gradient(circle, transparent 0px, transparent 3px, rgba(255,255,255,0.03) 4px, transparent 5px);">
                     
-                    <!-- Etichetta / Copertina al Centro -->
-                    <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-2 border-slate-700 shadow-inner flex items-center justify-center relative">
+                    <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-slate-700 shadow-inner flex items-center justify-center relative">
                         <img id="vinyl-img" src="/logo.png" class="w-full h-full object-cover">
-                        <!-- Foro del vinile al centro -->
                         <div class="absolute w-4 h-4 rounded-full bg-slate-900 border border-slate-600 shadow-md"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Titolo ed Autore -->
-            <div class="space-y-1.5 px-4">
+            <!-- 2. TITOLO ED AUTORE SOTTO IL VINILE -->
+            <div class="space-y-1 px-4">
                 <h2 id="vinyl-title" class="text-xl sm:text-2xl font-black text-white leading-tight drop-shadow-md">Titolo Episodio</h2>
                 <p id="vinyl-author" class="text-xs sm:text-sm font-semibold text-slate-300 drop-shadow">Autore Podcast</p>
             </div>
 
-            <button onclick="closeVinylModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-6 py-2 rounded-full backdrop-blur-md transition">
-                Minimizza
-            </button>
+            <!-- 3. BARRA DI AVANZAMENTO (SEEKBAR) -->
+            <div class="w-full px-2 space-y-1">
+                <input type="range" id="vinyl-seekbar" min="0" value="0" step="0.1" oninput="seekAudio(this.value)" class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                <div class="flex justify-between text-[10px] text-slate-300 font-mono">
+                    <span id="vinyl-current-time">0:00</span>
+                    <span id="vinyl-duration-time">0:00</span>
+                </div>
+            </div>
+
+            <!-- 4. CONTROLLI MEDIA SOTTO IL VINILE (SEPARATI DAL VINILE) -->
+            <div class="flex items-center justify-between bg-white/10 px-5 py-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl w-full">
+                
+                <!-- Selettore Velocità -->
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-300">⚡</span>
+                    <select id="vinyl-speed-select" onchange="changeSpeed(this.value)" class="bg-transparent text-white text-xs font-bold outline-none cursor-pointer">
+                        <option value="1" class="text-slate-900" selected>1.0x</option>
+                        <option value="1.25" class="text-slate-900">1.25x</option>
+                        <option value="1.5" class="text-slate-900">1.5x</option>
+                        <option value="2" class="text-slate-900">2.0x</option>
+                    </select>
+                </div>
+
+                <!-- Indietro -15s -->
+                <button onclick="skipTime(-15)" title="Indietro 15 secondi" class="text-white hover:text-indigo-300 text-sm font-bold transition p-1">
+                    ⏪ -15s
+                </button>
+
+                <!-- PULSANTE PLAY / PAUSA GRANDE -->
+                <button id="vinyl-play-btn" onclick="togglePlayPause()" class="w-12 h-12 bg-white text-slate-900 rounded-full flex items-center justify-center text-xl font-black shadow-lg hover:scale-110 active:scale-95 transition">
+                    ▶
+                </button>
+
+                <!-- Avanti +15s -->
+                <button onclick="skipTime(15)" title="Avanti 15 secondi" class="text-white hover:text-indigo-300 text-sm font-bold transition p-1">
+                    +15s ⏩
+                </button>
+
+                <!-- Pulsante Minimizza -->
+                <button onclick="closeVinylModal()" title="Minimizza" class="text-xs text-slate-300 hover:text-white font-semibold p-1">
+                    🔽
+                </button>
+            </div>
+
         </div>
     </div>
 
@@ -253,7 +291,7 @@
                 </div>
             </div>
 
-            <!-- Controlli Extra Player -->
+            <!-- Controlli Extra Player In Basso -->
             <div class="flex items-center gap-3">
                 <button onclick="skipTime(-15)" title="Indietro 15s" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-xs font-bold text-slate-700 dark:text-slate-200 transition">
                     ⏪ -15s
@@ -288,14 +326,15 @@
         const vinylBgBlur = document.getElementById('vinyl-bg-blur');
         const vinylTitle = document.getElementById('vinyl-title');
         const vinylAuthor = document.getElementById('vinyl-author');
+        const vinylPlayBtn = document.getElementById('vinyl-play-btn');
+        const vinylSeekbar = document.getElementById('vinyl-seekbar');
+        const vinylCurrentTime = document.getElementById('vinyl-current-time');
+        const vinylDurationTime = document.getElementById('vinyl-duration-time');
 
         let favorites = JSON.parse(localStorage.getItem('meron_favorites')) || [];
         let allPodcastResults = [];
         let currentPage = 1;
         const pageSize = 6;
-        let currentPodcastTitle = "";
-        let currentPodcastAuthor = "";
-        let currentArtwork = "/logo.png";
 
         function initApp() {
             if (localStorage.getItem('meron_theme') === 'dark') {
@@ -306,9 +345,44 @@
             renderFavorites();
             loadCategory('');
 
-            // Ascolta gli eventi Play e Pausa per far girare o fermare il vinile
-            player.addEventListener('play', () => vinylDisc.classList.remove('paused-vinyl'));
-            player.addEventListener('pause', () => vinylDisc.classList.add('paused-vinyl'));
+            // Sincronizzazione Play/Pause per il Vinile
+            player.addEventListener('play', () => {
+                vinylDisc.classList.remove('paused-vinyl');
+                vinylPlayBtn.innerText = '⏸';
+            });
+
+            player.addEventListener('pause', () => {
+                vinylDisc.classList.add('paused-vinyl');
+                vinylPlayBtn.innerText = '▶';
+            });
+
+            // Sincronizzazione Avanzamento Tempo
+            player.addEventListener('timeupdate', () => {
+                if (!isNaN(player.duration)) {
+                    vinylSeekbar.max = player.duration;
+                    vinylSeekbar.value = player.currentTime;
+                    vinylCurrentTime.innerText = formatTime(player.currentTime);
+                    vinylDurationTime.innerText = formatTime(player.duration);
+                }
+            });
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function togglePlayPause() {
+            if (player.paused) {
+                player.play();
+            } else {
+                player.pause();
+            }
+        }
+
+        function seekAudio(val) {
+            player.currentTime = val;
         }
 
         function toggleDarkMode() {
@@ -331,12 +405,7 @@
             player.src = url;
             playerTitle.innerText = title;
             playerImg.src = image;
-            
-            currentPodcastTitle = title;
-            currentPodcastAuthor = author;
-            currentArtwork = image;
 
-            // Aggiorna la vista Vinile
             vinylTitle.innerText = title;
             vinylAuthor.innerText = author;
             vinylImg.src = image;
@@ -344,11 +413,11 @@
 
             const speed = document.getElementById('speed-select').value;
             player.playbackRate = parseFloat(speed);
+            document.getElementById('vinyl-speed-select').value = speed;
             
             player.play();
             openVinylModal();
 
-            // MEDIA SESSION API
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
@@ -379,6 +448,8 @@
 
         function changeSpeed(val) {
             player.playbackRate = parseFloat(val);
+            document.getElementById('speed-select').value = val;
+            document.getElementById('vinyl-speed-select').value = val;
         }
 
         // --- SKELETON LOADING ---
