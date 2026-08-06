@@ -2,15 +2,12 @@ import os
 import shutil
 import feedparser
 from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import requests
 
 app = FastAPI()
-
-# Permette a FastAPI di servire il logo e altri file statici dalla radice
-app.mount("/logo.png", StaticFiles(filename="logo.png"), name="logo")
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -19,6 +16,16 @@ app.mount("/audio", StaticFiles(directory=UPLOAD_DIR), name="audio")
 templates = Jinja2Templates(directory="templates")
 
 user_episodes = []
+
+
+# --- ROTTA PER IL LOGO ---
+@app.get("/logo.png")
+async def get_logo():
+    if os.path.exists("logo.png"):
+        return FileResponse("logo.png")
+    elif os.path.exists("logo.jpg"):
+        return FileResponse("logo.jpg")
+    return {"error": "Logo non trovato"}
 
 
 @app.get("/", response_class=HTMLResponse)
