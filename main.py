@@ -4,6 +4,18 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
+
+# --- ROTTE PER GESTIRE I FILE STATICI E IL LOGO ---
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+  return send_from_directory('static', filename)
+
+
+@app.route('/logo.png')
+def serve_logo():
+  return send_from_directory('static', 'logo.png')
+
+
 # Memoria locale temporanea per gli episodi caricati dall'utente
 user_episodes_list = []
 
