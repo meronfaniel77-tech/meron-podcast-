@@ -4,6 +4,9 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
+# Memoria locale temporanea per gli episodi caricati dall'utente
+user_episodes_list = []
+
 
 # --- ROTTE PWA (MANIFEST E SERVICE WORKER) ---
 @app.route('/manifest.json')
@@ -16,16 +19,23 @@ def service_worker():
   return send_from_directory('.', 'sw.js')
 
 
-# --- ROTTE APPLICAZIONE ---
+# --- ROTTA PRINCIPALE ---
 @app.route('/')
 def index():
-  return render_template('index.html')
+  return render_template('index.html', user_episodes=user_episodes_list)
 
 
+# --- API TOP PODCAST (supporta genre_id) ---
 @app.route('/api/top-podcasts')
 def top_podcasts():
-  limit = request.args.get('limit', default=10, type=int)
-  url = f'https://itunes.apple.com/it/rss/toppodcasts/limit={limit}/json'
+  genre_id = request.args.get('genre_id', '')
+  limit = request.args.get('limit', default=50, type=int)
+
+  if genre_id:
+    url = f'https://itunes.apple.com/it/rss/toppodcasts/limit={limit}/genre={genre_id}/json'
+  else:
+    url = f'https://itunes.apple.com/it/rss/toppodcasts/limit={limit}/json'
+
   try:
     res = requests.get(url, timeout=10)
     data = res.json()
@@ -33,51 +43,43 @@ def top_podcasts():
 
     results = []
     for entry in entries:
-      # Estrazione ID iTunes
       podcast_id = entry.get('id', {}).get('attributes', {}).get('im:id', '')
-
-      # Immagine a risoluzione più alta se disponibile
       images = entry.get('im:image', [])
-      image_url = images[-1]['label'] if images else ''
+      image_url = images[-1]['label'] if images else '/logo.png'
 
+      # Per le categorie Apple RSS otteniamo il feed tramite Lookup o placeholder
       results.append({
-          'id': podcast_id,
-          'title': entry.get('im:name', {}).get('label', ''),
-          'artist': entry.get('im:artist', {}).get('label', ''),
-          'image': image_url,
+          'collectionId': podcast_id,
+          'collectionName': entry.get('im:name', {}).get('label', ''),
+          'artistName': entry.get('im:artist', {}).get('label', ''),
+          'artworkUrl60': image_url,
+          'feedUrl': f'/api/lookup-feed?id={podcast_id}',
       })
-    return jsonify(results)
+    return jsonify({'results': results})
   except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    return jsonify({'results': [], 'error': str(e)})
 
 
+# --- API RICERCA PODCAST (supporta term) ---
 @app.route('/api/search')
 def search():
-  query = request.args.get('q', '')
+  query = request.args.get('term', '')
   if not query:
-    return jsonify([])
+    return jsonify({'results': []})
 
   url = 'https://itunes.apple.com/search'
-  params = {'term': query, 'media': 'podcast', 'country': 'IT', 'limit': 15}
+  params = {'term': query, 'media': 'podcast', 'country': 'IT', 'limit': 30}
   try:
     res = requests.get(url, params=params, timeout=10)
     data = res.json()
-    results = []
-    for item in data.get('results', []):
-      results.append({
-          'id': item.get('collectionId'),
-          'title': item.get('collectionName'),
-          'artist': item.get('artistName'),
-          'image': item.get('artworkUrl600') or item.get('artworkUrl100'),
-          'feedUrl': item.get('feedUrl'),
-      })
-    return jsonify(results)
+    return jsonify(data)
   except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    return jsonify({'results': [], 'error': str(e)})
 
 
-@app.route('/api/podcast-details')
-def podcast_details():
+# --- API PER RISOLVERE FEED RSS DA ID ---
+@app.route('/api/lookup-feed')
+def lookup_feed():
   podcast_id = request.args.get('id')
   if not podcast_id:
     return jsonify({'error': 'ID mancante'}), 400
@@ -88,29 +90,40 @@ def podcast_details():
     res = requests.get(url, params=params, timeout=10)
     data = res.json()
     results = data.get('results', [])
-    if not results:
-      return jsonify({'error': 'Podcast non trovato'}), 404
+    if results and 'feedUrl' in results[0]:
+      return jsonify({'feedUrl': results[0]['feedUrl']})
+    return jsonify({'error': 'Feed non trovato'}), 404
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
 
-    podcast_data = results[0]
-    feed_url = podcast_data.get('feedUrl')
 
-    if not feed_url:
-      return jsonify({'error': 'Feed RSS non disponibile'}), 400
+# --- API PER LEGGERE GLI EPISODI DA UN FEED RSS ---
+@app.route('/api/episodes')
+def get_episodes():
+  feed_url = request.args.get('feedUrl', '')
 
-    # Parsing del feed RSS con feedparser
+  # Se è un link interno di lookup, trova il feed vero
+  if feed_url.startswith('/api/lookup-feed'):
+    podcast_id = feed_url.split('id=')[-1]
+    res = requests.get(
+        f'https://itunes.apple.com/lookup?id={podcast_id}&country=IT'
+    ).json()
+    if res.get('results') and 'feedUrl' in res['results'][0]:
+      feed_url = res['results'][0]['feedUrl']
+
+  if not feed_url:
+    return jsonify({'episodes': []})
+
+  try:
     feed = feedparser.parse(feed_url)
-
     episodes = []
     for entry in feed.entries:
-      # Cerca l'enclosure audio
       audio_url = None
       if 'enclosures' in entry:
         for enc in entry.enclosures:
           if 'audio' in enc.get('type', ''):
             audio_url = enc.get('href')
             break
-
-      # Se non lo trova nelle enclosures, cerca nei link
       if not audio_url and 'links' in entry:
         for link in entry.links:
           if 'audio' in link.get('type', ''):
@@ -119,20 +132,12 @@ def podcast_details():
 
       episodes.append({
           'title': entry.get('title', 'Senza titolo'),
-          'description': entry.get('summary', entry.get('description', '')),
-          'published': entry.get('published', ''),
           'audio_url': audio_url,
+          'published': entry.get('published', '')[:16],
       })
-
-    return jsonify({
-        'title': podcast_data.get('collectionName'),
-        'artist': podcast_data.get('artistName'),
-        'image': podcast_data.get('artworkUrl600')
-        or podcast_data.get('artworkUrl100'),
-        'episodes': episodes,
-    })
+    return jsonify({'episodes': episodes})
   except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    return jsonify({'episodes': [], 'error': str(e)})
 
 
 if __name__ == '__main__':
